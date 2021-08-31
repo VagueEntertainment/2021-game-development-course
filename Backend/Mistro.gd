@@ -99,74 +99,78 @@ func process_input(obj,camera,delta):
 
 ### World creation
 
-func create_block(obj,randomseed,size = Vector2(16,16)):
+func create_block(land,water,randomseed,size = Vector2(16,16)):
+	var vertex_count := 0
+	var time := 0.0
+	var wave_length := 0.25
 	var TriSize = 8
 	var map = []
 	var Z_OFFSET = 0
+	var smoothing = 1
+	rand_seed(randomseed)
+	var string_random = str(randomseed)
 	
-	var grid_z = []
-	var grid = []
-	while len(grid_z) <= size.y:
-		grid_z.append(Z_OFFSET)
-		var X_OFFSET = 0
-		var grid_x = []
-		while len(grid_x) <= size.x:
-			grid_x.append(Vector3(X_OFFSET,0,grid_z[-1]))
-			X_OFFSET += TriSize
-		grid.append(grid_x)
-		Z_OFFSET += TriSize
+	water.mesh.size.x = land.mesh.size.x
+	water.mesh.size.y = land.mesh.size.y
+	land.mesh.subdivide_width = smoothing * size.x
+	land.mesh.subdivide_depth = smoothing * size.y
+	#gets the MeshArray arrays for the only surface on the ground mesh
+	var mesh_array = land.mesh.surface_get_arrays(0)
+	#var mesh_material = obj.mesh.material
+	#vertex array is at index 0
+	var va = mesh_array[0]
+	#vertex count is just to update on screen debug info
+	vertex_count = va.size()
+	
+	for i in range(vertex_count):
+		var v = va[i]
+		v.y = rand_range(int(string_random[0]),int(string_random[1]))
+		va.set(i, v)
 		
-	print(grid[0])
-	print(grid[1])
+	for a in range(vertex_count):
+		randomize()
+		var v = va[a]
+		if int(round(rand_range(1,199)))  == 1: 
+			#print("mountain range ",-1 * int(string_random.substr(1,2))," ",int(string_random.substr(3,2)))
+			randomize()
+			var fromto1 = rand_range(0,len(string_random))
+			randomize()
+			var fromto2 = rand_range(0,len(string_random))
+			v.y = rand_range(-1 * int(string_random.substr(fromto1,3)),int(string_random.substr(fromto2,2)))
+			#print(v.y) 
+			va.set(a, v)
+	for f in range(smoothing):
+		for b in range(vertex_count):
+			var v = va[b]
+			if v.y > va[b-1].y+10:
+				va[b-1].y = v.y * rand_range(0.80,1.00)
+				va.set(b-1,va[b-1])
+			if b+1 < vertex_count:
+				if v.y > va[b+1].y+10:
+					va[b+1].y = v.y * rand_range(0.50,1.00)
+					va.set(b+1,va[b+1])
+			if b+smoothing*size.x < vertex_count:
+				if v.y > va[b+smoothing*size.x].y+10:
+					va[b+smoothing*size.x].y = v.y * rand_range(0.80,1.00)
+					va.set(b+smoothing*size.x,va[b+smoothing*size.x])
+			if b-smoothing*size.x > 0:
+				if v.y > va[b-smoothing*size.x].y+10:
+					va[b-smoothing*size.x].y = v.y * rand_range(0.80,1.00)
+					va.set(b-smoothing*size.x,va[b-smoothing*size.x])
+			
+			
+	#replace old vertex array with modified vertex array
+	mesh_array[0] = va
+	var array_mesh = ArrayMesh.new()
 	
-	var point1 = Vector3()
-	var point2 = Vector3()
-	var point3 = Vector3()
-	var row = []
-	var Flip_even = false
-	var Flip_odd = false
-	var OFFSET = 0
-	while len(row) < 16:
-		if len(row) % 2 == 0:
-			if !Flip_even:
-				point1 = grid[0][len(row)]
-				point2 = grid[1][len(row)]
-				point3 = grid[1][len(row)+1]
-				Flip_even = true
-			else:
-				point1 = grid[0][len(row)-1]
-				point2 = grid[1][len(row)-1]
-				point3 = grid[0][len(row)]
-				Flip_even = false
-		else:
-			if !Flip_odd:
-				point1 = grid[0][len(row)-1]
-				point2 = grid[0][len(row)]
-				point3 = grid[1][len(row)]
-				Flip_odd = true
-			else:
-				point1 = grid[1][len(row)]
-				point2 = grid[0][len(row)+1]
-				point3 = grid[1][len(row)+1]
-				Flip_odd = false
-				
-		var points = [point1,point2,point3]
-		row.append(points)
-		
-			 
-	map = row
-	#map.append(row)
-		
-	### Create a flat map
+	array_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, mesh_array)
+	#set the ground MeshInstance mesh to the ArrayMesh with the modified
+	#vertex mesh.
+	land.mesh = array_mesh
+	#obj.mesh.material = mesh_material
 	
-	
-	if obj.get_class() == "ImmediateGeometry":
-		### Create first quad
-		obj.begin(Mesh.PRIMITIVE_TRIANGLES)
-		for tri in map:
-			obj.add_vertex(tri[0])
-			obj.add_vertex(tri[1])
-			obj.add_vertex(tri[2])
-		obj.end()	
-		#obj.rotate(Vector3(1,0,0),30)
+	var col_shape = ConcavePolygonShape.new()
+	col_shape.set_faces(land.mesh.get_faces())
+	land.get_parent().get_node("CollisionShape").set_shape(col_shape)
+
 	pass

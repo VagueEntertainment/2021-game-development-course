@@ -1,23 +1,26 @@
-[gd_scene load_steps=11 format=2]
+[gd_scene load_steps=16 format=2]
 
 [ext_resource path="res://Scenes/Models/Player/PlayerTemplate.tscn" type="PackedScene" id=1]
 [ext_resource path="res://default_env.tres" type="Environment" id=2]
 [ext_resource path="res://Scenes/Levels/Scripts/TestGround.gd" type="Script" id=3]
 
-[sub_resource type="CubeMesh" id=1]
-size = Vector3( 1000, 0, 1000 )
+[sub_resource type="PlaneMesh" id=1]
+size = Vector2( 1000, 1000 )
+subdivide_width = 42
+subdivide_depth = 42
 
-[sub_resource type="SpatialMaterial" id=2]
-albedo_color = Color( 0.478431, 0.537255, 0.317647, 1 )
+[sub_resource type="SpatialMaterial" id=8]
+params_diffuse_mode = 3
+albedo_color = Color( 0.227451, 0.392157, 0.137255, 1 )
 metallic_specular = 0.0
 
-[sub_resource type="ConvexPolygonShape" id=3]
+[sub_resource type="ConvexPolygonShape" id=2]
 points = PoolVector3Array( -500, 0, 500, 500, 0, -500, 500, 0, 500, -500, 0, -500, -500, 0, 500, 500, 0, -500, 500, 0, 500, -500, 0, -500, 500, 0, 500, -500, 0, -500, 500, 0, -500, -500, 0, 500, 500, 0, 500, -500, 0, -500, 500, 0, -500, -500, 0, 500, 500, 0, 500, -500, 0, 500, -500, 0, 500, 500, 0, 500, 500, 0, -500, -500, 0, -500, -500, 0, -500, 500, 0, -500 )
 
-[sub_resource type="SpatialMaterial" id=4]
+[sub_resource type="SpatialMaterial" id=3]
 albedo_color = Color( 0.137255, 0.427451, 0.0470588, 1 )
 
-[sub_resource type="SpatialMaterial" id=7]
+[sub_resource type="SpatialMaterial" id=4]
 params_cull_mode = 2
 albedo_color = Color( 0.878431, 0.180392, 0.180392, 1 )
 
@@ -26,14 +29,77 @@ extents = Vector3( 5000, 50, 1 )
 
 [sub_resource type="GIProbeData" id=6]
 bounds = AABB( -5000, -100, -5000, 10000, 200, 10000 )
-cell_size = 39.0625
-to_cell_xform = Transform( 0.0256, 0, 0, 0, 0.0256, 0, 0, 0, 0.0256, 128, 2.56, 128 )
-dynamic_data = PoolIntArray( 0, 9, 256, 8, 256, 1, 0, 1134948878, 0, -1086410401, -1087714176, 1119534637, -2147483648, 1061073247, 1059769472, 1132367758, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 8355711, 0 )
+cell_size = 19.5312
+to_cell_xform = Transform( 0.0512, 0, 0, 0, 0.0512, 0, 0, 0, 0.0512, 256, 5.12, 256 )
+dynamic_data = PoolIntArray( 0, 10, 512, 16, 512, 1, 0, 0, 0, 0, 3, 0, 1287736352, 0, 0, 0, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 8355711, 0 )
 dynamic_range = 4
 energy = 0.5
 bias = 1.5
 normal_bias = 0.505
 propagation = 0.7
+
+[sub_resource type="PlaneMesh" id=9]
+
+[sub_resource type="VisualShaderNodeVectorFunc" id=10]
+output_port_for_preview = 0
+default_input_values = [ 0, Vector3( 0.5, 1, 0.1 ) ]
+function = 4
+
+[sub_resource type="VisualShaderNodeVectorFunc" id=13]
+default_input_values = [ 0, Vector3( 1, 0.2, 0.2 ) ]
+function = 1
+
+[sub_resource type="VisualShader" id=11]
+code = "shader_type spatial;
+render_mode specular_schlick_ggx;
+
+
+
+
+void vertex() {
+// Output:0
+
+}
+
+void fragment() {
+// VectorFunc:3
+	vec3 n_in3p0 = vec3(0.50000, 1.00000, 0.10000);
+	vec3 n_out3p0;
+	{
+		vec3 c = n_in3p0;
+		vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
+		vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g));
+		vec4 q = mix(vec4(p.xyw, c.r), vec4(c.r, p.yzx), step(p.x, c.r));
+		float d = q.x - min(q.w, q.y);
+		float e = 1.0e-10;
+		n_out3p0 = vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
+	}
+
+// VectorFunc:4
+	vec3 n_in4p0 = vec3(1.00000, 0.20000, 0.20000);
+	vec3 n_out4p0 = max(min(n_in4p0, vec3(1.0)), vec3(0.0));
+
+// Output:0
+	ALBEDO = n_out3p0;
+	ALPHA = dot(n_out4p0, vec3(0.333333, 0.333333, 0.333333));
+
+}
+
+void light() {
+// Output:0
+
+}
+"
+graph_offset = Vector2( -491.97, 169 )
+nodes/fragment/0/position = Vector2( 560, 160 )
+nodes/fragment/3/node = SubResource( 10 )
+nodes/fragment/3/position = Vector2( 40, 200 )
+nodes/fragment/4/node = SubResource( 13 )
+nodes/fragment/4/position = Vector2( 20, 380 )
+nodes/fragment/connections = PoolIntArray( 3, 0, 0, 0, 4, 0, 0, 1 )
+
+[sub_resource type="ShaderMaterial" id=12]
+shader = SubResource( 11 )
 
 [node name="TestGround" type="Spatial"]
 script = ExtResource( 3 )
@@ -46,11 +112,11 @@ collision_layer = 519
 [node name="MeshInstance" type="MeshInstance" parent="Ground"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.681, 0.05, 0.801 )
 mesh = SubResource( 1 )
-material/0 = SubResource( 2 )
+material/0 = SubResource( 8 )
 
-[node name="CollisionShape2" type="CollisionShape" parent="Ground"]
+[node name="CollisionShape" type="CollisionShape" parent="Ground"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.681, 0, 0.801 )
-shape = SubResource( 3 )
+shape = SubResource( 2 )
 
 [node name="CSGBox" type="CSGBox" parent="Ground"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.4, 0 )
@@ -58,15 +124,16 @@ visible = false
 width = 500.0
 height = 1.0
 depth = 500.0
-material = SubResource( 4 )
+material = SubResource( 3 )
 
 [node name="Ground" type="ImmediateGeometry" parent="Ground"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -19.0552, 0.1, 0 )
-material_override = SubResource( 7 )
+visible = false
+material_override = SubResource( 4 )
 cast_shadow = 0
 
 [node name="PlayerTemplate" parent="." instance=ExtResource( 1 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.40631, 0 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 30.0488, 0 )
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = ExtResource( 2 )
@@ -79,32 +146,45 @@ directional_shadow_mode = 0
 
 [node name="StaticBody" type="StaticBody" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 26.0545, 0 )
+visible = false
 
 [node name="CollisionShape" type="CollisionShape" parent="StaticBody"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 495.503 )
 shape = SubResource( 5 )
+disabled = true
 
 [node name="CollisionShape2" type="CollisionShape" parent="StaticBody"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -5000 )
 shape = SubResource( 5 )
+disabled = true
 
 [node name="CollisionShape3" type="CollisionShape" parent="StaticBody"]
 transform = Transform( -4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 5000, 0, -0.1 )
 shape = SubResource( 5 )
+disabled = true
 
 [node name="CollisionShape4" type="CollisionShape" parent="StaticBody"]
 transform = Transform( -4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -491.326, 0, -0.0997521 )
 shape = SubResource( 5 )
+disabled = true
 
 [node name="GIProbe" type="GIProbe" parent="."]
-subdiv = 2
-extents = Vector3( 5000, 100, 5000 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 98.1195, 0 )
+subdiv = 3
+extents = Vector3( 500, 100, 500 )
 energy = 0.5
 normal_bias = 0.505
 data = SubResource( 6 )
 
 [node name="Camera" type="Camera" parent="."]
 transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 26.3223, 0 )
+visible = false
 projection = 1
-current = true
 size = 50.0
+
+[node name="Waterline" type="Spatial" parent="."]
+
+[node name="MeshInstance" type="MeshInstance" parent="Waterline"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0 )
+mesh = SubResource( 9 )
+material/0 = SubResource( 12 )

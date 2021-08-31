@@ -20,6 +20,7 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.00167, 0 )
 
 [node name="Camera" type="Camera" parent="RotationHelper"]
 transform = Transform( 1, 0, 0, 0, 0.98258, 0.185838, 0, -0.185838, 0.98258, 0, 0.460357, 2.1213 )
+far = 8192.0
 
 [node name="Position3D" type="Position3D" parent="."]
 
