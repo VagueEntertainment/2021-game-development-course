@@ -33,7 +33,7 @@ func _process(_delta):
 	#pass
 
 func generate_rocks():
-	var num_of_rocks = int(rand_range(1,5))
+	var num_of_rocks = int(rand_range(1,1))
 	
 	while get_child_count() < num_of_rocks:
 		var rock_instance = $rock.duplicate()

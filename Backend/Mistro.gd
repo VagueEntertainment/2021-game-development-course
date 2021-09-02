@@ -106,14 +106,17 @@ func create_block(land,water,randomseed,size = Vector2(16,16)):
 	var TriSize = 8
 	var map = []
 	var Z_OFFSET = 0
-	var smoothing = 1
+	var smoothing = 2
 	rand_seed(randomseed)
 	var string_random = str(randomseed)
 	
-	water.mesh.size.x = land.mesh.size.x
-	water.mesh.size.y = land.mesh.size.y
-	land.mesh.subdivide_width = smoothing * size.x
-	land.mesh.subdivide_depth = smoothing * size.y
+	if land.mesh is ArrayMesh:
+		print("need to find a better method")
+	else:
+		water.mesh.size.x = land.mesh.size.x * 1.2
+		water.mesh.size.y = land.mesh.size.y * 1.2
+		land.mesh.subdivide_width = smoothing * size.x
+		land.mesh.subdivide_depth = smoothing * size.y
 	#gets the MeshArray arrays for the only surface on the ground mesh
 	var mesh_array = land.mesh.surface_get_arrays(0)
 	#var mesh_material = obj.mesh.material
@@ -130,7 +133,7 @@ func create_block(land,water,randomseed,size = Vector2(16,16)):
 	for a in range(vertex_count):
 		randomize()
 		var v = va[a]
-		if int(round(rand_range(1,199)))  == 1: 
+		if int(round(rand_range(1,12*smoothing)))  == 1: 
 			#print("mountain range ",-1 * int(string_random.substr(1,2))," ",int(string_random.substr(3,2)))
 			randomize()
 			var fromto1 = rand_range(0,len(string_random))
@@ -139,25 +142,6 @@ func create_block(land,water,randomseed,size = Vector2(16,16)):
 			v.y = rand_range(-1 * int(string_random.substr(fromto1,3)),int(string_random.substr(fromto2,2)))
 			#print(v.y) 
 			va.set(a, v)
-	for f in range(smoothing):
-		for b in range(vertex_count):
-			var v = va[b]
-			if v.y > va[b-1].y+10:
-				va[b-1].y = v.y * rand_range(0.80,1.00)
-				va.set(b-1,va[b-1])
-			if b+1 < vertex_count:
-				if v.y > va[b+1].y+10:
-					va[b+1].y = v.y * rand_range(0.50,1.00)
-					va.set(b+1,va[b+1])
-			if b+smoothing*size.x < vertex_count:
-				if v.y > va[b+smoothing*size.x].y+10:
-					va[b+smoothing*size.x].y = v.y * rand_range(0.80,1.00)
-					va.set(b+smoothing*size.x,va[b+smoothing*size.x])
-			if b-smoothing*size.x > 0:
-				if v.y > va[b-smoothing*size.x].y+10:
-					va[b-smoothing*size.x].y = v.y * rand_range(0.80,1.00)
-					va.set(b-smoothing*size.x,va[b-smoothing*size.x])
-			
 			
 	#replace old vertex array with modified vertex array
 	mesh_array[0] = va
@@ -169,8 +153,77 @@ func create_block(land,water,randomseed,size = Vector2(16,16)):
 	land.mesh = array_mesh
 	#obj.mesh.material = mesh_material
 	
+	for f in range(smoothing):
+		
+		var mesh_array_s = land.mesh.surface_get_arrays(0)
+		#print("Mesh array length is: ",len(mesh_array_s[0]))
+		var t = 0
+		
+		## Randomizes the position of the vertices to make a more organic feel
+		while t < len(mesh_array_s[0]):
+			randomize()
+			var smesh = mesh_array_s[0][t] + Vector3(rand_range(-2,2),0,rand_range(-2,2))
+			mesh_array_s[0][t] = smesh
+			mesh_array_s[0].set(t,smesh)
+			t += 1
+		
+		var vertex_count_s := len(mesh_array_s[0])
+		var va_s = mesh_array_s[0]
+		
+		for b in range(vertex_count_s):
+			var v = va_s[b]
+			if v.y > va_s[b-1].y+20:
+				va_s[b-1].y = v.y * rand_range(0.80,1.00)
+				va_s.set(b-1,va_s[b-1])
+			if b+1 < vertex_count_s:
+				if v.y > va_s[b+1].y+20:
+					va_s[b+1].y = v.y * rand_range(0.90,1.00)
+					va_s.set(b+1,va_s[b+1])
+			if b+smoothing*size.x < vertex_count_s:
+				if v.y > va_s[b+smoothing*size.x].y+20:
+					va_s[b+smoothing*size.x].y = v.y * rand_range(0.90,1.00)
+					va_s.set(b+smoothing*size.x,va_s[b+smoothing*size.x])
+			if b-smoothing*size.x > 0:
+				if v.y > va_s[b-smoothing*size.x].y+20:
+					va_s[b-smoothing*size.x].y = v.y * rand_range(0.80,1.00)
+					va_s.set(b-smoothing*size.x,va_s[b-smoothing*size.x])
+		
+		mesh_array_s[0] = va_s
+		
+		var array_mesh_s = ArrayMesh.new()
+		array_mesh_s.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, mesh_array_s)
+		land.mesh = array_mesh_s
+		
+	## Simulate errosion
+	
+	var mesh_array_e = land.mesh.surface_get_arrays(0)
+	var va_e = mesh_array_e[0]
+	
+	for e in range(vertex_count):
+		var v = va_e[e]
+		if v.y > va_e[e-1].y+20:
+			v.y  = va_e[e-1].y * rand_range(0.80,1.00)
+			va_e.set(e,v)
+		if e+1 < vertex_count:
+			if v.y > va_e[e+1].y+20:
+				v.y = va_e[e+1].y * rand_range(0.90,1.00)
+				va_e.set(e,v)
+		if e+smoothing*size.x < vertex_count:
+			if v.y > va_e[e+smoothing*size.x].y+20:
+				v.y = va_e[e+smoothing*size.x].y  * rand_range(0.90,1.00)
+				va_e.set(e,v)
+		if e-smoothing*size.x > 0:
+			if v.y > va_e[e-smoothing*size.x].y+20:
+				v.y = va_e[e-smoothing*size.x].y * rand_range(0.80,1.00)
+				va_e.set(e,v)
+		
+	var array_mesh_e = ArrayMesh.new()
+	array_mesh_e.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, mesh_array_e)
+	land.mesh = array_mesh_e
+		
+		
 	var col_shape = ConcavePolygonShape.new()
 	col_shape.set_faces(land.mesh.get_faces())
 	land.get_parent().get_node("CollisionShape").set_shape(col_shape)
-
-	pass
+	water.get_parent().translate(Vector3(0,mesh_array_e[0][int(rand_range(0,len(mesh_array_e[0])))].y,0))
+	return mesh_array_e[0]
