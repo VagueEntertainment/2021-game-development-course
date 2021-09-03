@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=2]
+[gd_scene load_steps=24 format=2]
 
 [ext_resource path="res://Scenes/Models/Player/PlayerTemplate.tscn" type="PackedScene" id=1]
 [ext_resource path="res://default_env.tres" type="Environment" id=2]
@@ -171,7 +171,7 @@ propagation = 0.7
 subdivide_width = 128
 subdivide_depth = 128
 
-[sub_resource type="Shader" id=24]
+[sub_resource type="Shader" id=15]
 code = "shader_type spatial;
 render_mode cull_disabled, specular_schlick_ggx;
 
@@ -225,18 +225,21 @@ void light() {
 }
 "
 
-[sub_resource type="OpenSimplexNoise" id=25]
+[sub_resource type="OpenSimplexNoise" id=16]
 
-[sub_resource type="NoiseTexture" id=26]
+[sub_resource type="NoiseTexture" id=17]
 seamless = true
-noise = SubResource( 25 )
+noise = SubResource( 16 )
 
-[sub_resource type="ShaderMaterial" id=22]
-shader = SubResource( 24 )
+[sub_resource type="ShaderMaterial" id=18]
+shader = SubResource( 15 )
 shader_param/height_scale = 0.5
-shader_param/noise = SubResource( 26 )
+shader_param/noise = SubResource( 17 )
 
-[sub_resource type="BoxShape" id=23]
+[sub_resource type="BoxShape" id=20]
+extents = Vector3( 1, 6.31698, 1 )
+
+[sub_resource type="BoxShape" id=19]
 extents = Vector3( 5000, 50, 1 )
 
 [node name="TestGround" type="Spatial"]
@@ -271,7 +274,15 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.34049, 0 )
 cast_shadow = 0
 use_in_baked_light = true
 mesh = SubResource( 14 )
-material/0 = SubResource( 22 )
+material/0 = SubResource( 18 )
+
+[node name="underwater" type="Area" parent="Ground/Waterline/MeshInstance"]
+gravity_point = true
+gravity = -6.58
+
+[node name="CollisionShape" type="CollisionShape" parent="Ground/Waterline/MeshInstance/underwater"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -5.90233, 0 )
+shape = SubResource( 20 )
 
 [node name="PlayerTemplate" parent="." instance=ExtResource( 1 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 30.0488, 0 )
@@ -291,22 +302,22 @@ visible = false
 
 [node name="CollisionShape" type="CollisionShape" parent="StaticBody"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 495.503 )
-shape = SubResource( 23 )
+shape = SubResource( 19 )
 disabled = true
 
 [node name="CollisionShape2" type="CollisionShape" parent="StaticBody"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -5000 )
-shape = SubResource( 23 )
+shape = SubResource( 19 )
 disabled = true
 
 [node name="CollisionShape3" type="CollisionShape" parent="StaticBody"]
 transform = Transform( -4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 5000, 0, -0.1 )
-shape = SubResource( 23 )
+shape = SubResource( 19 )
 disabled = true
 
 [node name="CollisionShape4" type="CollisionShape" parent="StaticBody"]
 transform = Transform( -4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -491.326, 0, -0.0997521 )
-shape = SubResource( 23 )
+shape = SubResource( 19 )
 disabled = true
 
 [node name="Camera" type="Camera" parent="."]
@@ -314,3 +325,7 @@ transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 26.3
 visible = false
 projection = 1
 size = 50.0
+
+[connection signal="area_shape_entered" from="Ground/Waterline/MeshInstance/underwater" to="." method="_on_underwater_area_shape_entered"]
+[connection signal="body_shape_entered" from="Ground/Waterline/MeshInstance/underwater" to="." method="_on_underwater_body_shape_entered"]
+[connection signal="body_shape_exited" from="Ground/Waterline/MeshInstance/underwater" to="." method="_on_underwater_body_shape_exited"]

@@ -1,7 +1,11 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://Assets/Models/rock1.glb" type="PackedScene" id=1]
 [ext_resource path="res://Scenes/Models/Misc/Scripts/rocks.gd" type="Script" id=2]
+
+[sub_resource type="CapsuleShape" id=3]
+radius = 1.05824
+height = 0.25617
 
 [sub_resource type="SpatialMaterial" id=1]
 albedo_color = Color( 0.168627, 0.305882, 0.0470588, 1 )
@@ -21,8 +25,15 @@ layers = 524288
 [node name="static_collision" parent="rock" index="0"]
 collision_mask = 2
 
+[node name="Area" type="Area" parent="rock" index="1"]
+
+[node name="CollisionShape" type="CollisionShape" parent="rock/Area" index="0"]
+transform = Transform( 1, 0, 0, 0, -0.00883131, 0.999961, 0, -0.999961, -0.00883131, -0.0226693, 1.18716, 0 )
+shape = SubResource( 3 )
+
 [node name="PlantCircle" type="Area" parent="." index="1"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -4.37835, 0 )
+visible = false
 
 [node name="plant_area" type="CSGCylinder" parent="PlantCircle" index="0"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.521961, 0 )
@@ -37,6 +48,7 @@ material = SubResource( 1 )
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.531575, 0 )
 shape = SubResource( 2 )
 
+[connection signal="body_shape_entered" from="rock/Area" to="." method="_on_Area_body_shape_entered"]
 [connection signal="area_shape_entered" from="PlantCircle" to="." method="_on_PlantCircle_area_shape_entered"]
 [connection signal="area_shape_exited" from="PlantCircle" to="." method="_on_PlantCircle_area_shape_exited"]
 [connection signal="body_entered" from="PlantCircle" to="." method="_on_PlantCircle_body_entered"]

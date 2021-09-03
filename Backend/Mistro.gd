@@ -115,6 +115,7 @@ func create_block(land,water,randomseed,size = Vector2(16,16)):
 	else:
 		water.mesh.size.x = land.mesh.size.x * 1.2
 		water.mesh.size.y = land.mesh.size.y * 1.2
+		water.get_node("underwater/CollisionShape").shape.set_extents(Vector3(water.mesh.size.x,6.317,water.mesh.size.y))
 		land.mesh.subdivide_width = smoothing * size.x
 		land.mesh.subdivide_depth = smoothing * size.y
 	#gets the MeshArray arrays for the only surface on the ground mesh
@@ -172,21 +173,39 @@ func create_block(land,water,randomseed,size = Vector2(16,16)):
 		
 		for b in range(vertex_count_s):
 			var v = va_s[b]
-			if v.y > va_s[b-1].y+20:
-				va_s[b-1].y = v.y * rand_range(0.80,1.00)
-				va_s.set(b-1,va_s[b-1])
-			if b+1 < vertex_count_s:
-				if v.y > va_s[b+1].y+20:
-					va_s[b+1].y = v.y * rand_range(0.90,1.00)
-					va_s.set(b+1,va_s[b+1])
-			if b+smoothing*size.x < vertex_count_s:
-				if v.y > va_s[b+smoothing*size.x].y+20:
-					va_s[b+smoothing*size.x].y = v.y * rand_range(0.90,1.00)
-					va_s.set(b+smoothing*size.x,va_s[b+smoothing*size.x])
-			if b-smoothing*size.x > 0:
-				if v.y > va_s[b-smoothing*size.x].y+20:
-					va_s[b-smoothing*size.x].y = v.y * rand_range(0.80,1.00)
-					va_s.set(b-smoothing*size.x,va_s[b-smoothing*size.x])
+			if v.y > 0: 
+				if v.y > va_s[b-1].y+20:
+					va_s[b-1].y = v.y * rand_range(0.80,1.00)
+					va_s.set(b-1,va_s[b-1])
+				if b+1 < vertex_count_s:
+					if v.y > va_s[b+1].y+20:
+						va_s[b+1].y = v.y * rand_range(0.90,1.00)
+						va_s.set(b+1,va_s[b+1])
+				if b+smoothing*size.x < vertex_count_s:
+					if v.y > va_s[b+smoothing*size.x].y+20:
+						va_s[b+smoothing*size.x].y = v.y * rand_range(0.90,1.00)
+						va_s.set(b+smoothing*size.x,va_s[b+smoothing*size.x])
+				if b-smoothing*size.x > 0:
+					if v.y > va_s[b-smoothing*size.x].y+20:
+						va_s[b-smoothing*size.x].y = v.y * rand_range(0.80,1.00)
+						va_s.set(b-smoothing*size.x,va_s[b-smoothing*size.x])
+			else:
+				print(v.y)
+				if v.y < va_s[b-1].y+20:
+					va_s[b-1].y = v.y * rand_range(0.80,0.50)
+					va_s.set(b-1,va_s[b-1])
+				#if b+1 < vertex_count_s:
+				#	if v.y > va_s[b+1].y-20:
+				#		va_s[b+1].y = v.y * rand_range(0.90,1.00)
+				#		va_s.set(b+1,va_s[b+1])
+				#if b+smoothing*size.x < vertex_count_s:
+				#	if v.y > va_s[b+smoothing*size.x].y-20:
+				#		va_s[b+smoothing*size.x].y = v.y * rand_range(0.90,1.00)
+				#		va_s.set(b+smoothing*size.x,va_s[b+smoothing*size.x])
+				#if b-smoothing*size.x > 0:
+				#	if v.y > va_s[b-smoothing*size.x].y-20:
+				#		va_s[b-smoothing*size.x].y = v.y * rand_range(0.80,1.00)
+				#		va_s.set(b-smoothing*size.x,va_s[b-smoothing*size.x])
 		
 		mesh_array_s[0] = va_s
 		
