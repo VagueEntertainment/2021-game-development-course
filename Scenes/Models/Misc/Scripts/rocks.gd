@@ -38,13 +38,13 @@ func _ready():
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(_delta):
+#func _process(_delta):
 	#Mistro.process_movement($rock,delta)
-	if found_ground == false:
+#	if found_ground == false:
 		#$PlantCircle.translate_object_local(Vector3(0,0.02,0))
-		self.translate(Vector3(0,-0.02,0))
-	else:
-		set_process(false)
+#		self.translate(Vector3(0,-0.02,0))
+#	else:
+#		set_process(false)
 	
 	#pass
 

@@ -51,6 +51,10 @@ func _on_underwater_area_shape_entered(area_id, area, area_shape, local_shape):
 func _on_underwater_body_shape_entered(body_id, body, body_shape, local_shape):
 	if body.name == "PlayerTemplate":
 		print("underwater ",body.name)
+		#pass
+	#if body.get_groups().has("Rock"):
+		#print("Rock")
+		#body.queue_free()
 	pass # Replace with function body.
 
 

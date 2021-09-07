@@ -4,7 +4,7 @@ extends Node
 # Function that go here, can be accessed by all other scripts.
 # Use this sparingly as noise between scenes and nodes can make your game run slower.
 #var camera = Camera.new()
-
+var smoothing = 2
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -106,7 +106,7 @@ func create_block(land,water,randomseed,size = Vector2(16,16)):
 	var TriSize = 8
 	var map = []
 	var Z_OFFSET = 0
-	var smoothing = 2
+	
 	rand_seed(randomseed)
 	var string_random = str(randomseed)
 	
@@ -245,4 +245,36 @@ func create_block(land,water,randomseed,size = Vector2(16,16)):
 	col_shape.set_faces(land.mesh.get_faces())
 	land.get_parent().get_node("CollisionShape").set_shape(col_shape)
 	water.get_parent().translate(Vector3(0,mesh_array_e[0][int(rand_range(0,len(mesh_array_e[0])))].y,0))
+	plants(land)
 	return mesh_array_e[0]
+
+### Plant Areas
+func plants(land):
+	var PlantAreas = Spatial.new()
+	land.add_child(PlantAreas)
+	var mesh_array = land.mesh.surface_get_arrays(0)
+	var va = mesh_array[0]
+	for i in range(20):
+		randomize()
+		var starting_point = int(rand_range(0,len(va)))
+		print(starting_point)
+		var rows = int(rand_range(20,60))
+		var plantingbed = MeshInstance.new()
+		var arrayMesh = ArrayMesh.new()
+		var array = []
+		for r in range(rows):
+			var columns = int(rand_range(10,40))
+			if starting_point+(r*1000) < va.size():
+				array.append(va[starting_point+(r*1000)])
+				var from = starting_point+(r*1000)
+				for c in range(columns):
+					if from - c > 0:
+						array.append(va[from -c])
+		
+		#print(array)
+		
+		arrayMesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, array)
+		plantingbed.mesh = arrayMesh
+		plantingbed.translate(va[starting_point]+Vector3(0,3,0))
+		PlantAreas.add_child(plantingbed)
+	
