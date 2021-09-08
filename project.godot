@@ -19,6 +19,11 @@ config/icon="res://icon.png"
 
 Mistro="*res://Backend/Mistro.tscn"
 
+[display]
+
+window/size/width=1366
+window/size/height=768
+
 [input]
 
 movement_forward={

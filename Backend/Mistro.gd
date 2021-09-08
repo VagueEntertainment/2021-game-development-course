@@ -251,30 +251,80 @@ func create_block(land,water,randomseed,size = Vector2(16,16)):
 ### Plant Areas
 func plants(land):
 	var PlantAreas = Spatial.new()
-	land.add_child(PlantAreas)
+	land.get_parent().add_child(PlantAreas)
 	var mesh_array = land.mesh.surface_get_arrays(0)
 	var va = mesh_array[0]
-	for i in range(20):
+	var uv = land.mesh.surface_get_arrays(0)[1]
+	var tangent = land.mesh.surface_get_arrays(0)[2]
+	var color = land.mesh.surface_get_arrays(0)[3]
+	var tex_uv = land.mesh.surface_get_arrays(0)[4]
+	var tex_uv2 = land.mesh.surface_get_arrays(0)[5]
+	var bones = land.mesh.surface_get_arrays(0)[6]
+	var weight = land.mesh.surface_get_arrays(0)[7]
+	var indices = land.mesh.surface_get_arrays(0)[8]
+	#var vertices = PoolVector3Array()
+	
+
+	
+	for i in range(1000):
 		randomize()
 		var starting_point = int(rand_range(0,len(va)))
-		print(starting_point)
-		var rows = int(rand_range(20,60))
-		var plantingbed = MeshInstance.new()
-		var arrayMesh = ArrayMesh.new()
-		var array = []
-		for r in range(rows):
-			var columns = int(rand_range(10,40))
-			if starting_point+(r*1000) < va.size():
-				array.append(va[starting_point+(r*1000)])
-				var from = starting_point+(r*1000)
-				for c in range(columns):
-					if from - c > 0:
-						array.append(va[from -c])
+		#print(starting_point)
+		var vertices = PoolVector3Array()
+	
+		for v in range(21):
+			vertices.append(va[indices[starting_point+v]] - va[indices[starting_point]])
+
+		# Initialize the ArrayMesh.
+		var arr_mesh = ArrayMesh.new()
+		var arrays = []
+		arrays.resize(ArrayMesh.ARRAY_MAX)
+		arrays[ArrayMesh.ARRAY_VERTEX] = vertices
+		arrays[ArrayMesh.ARRAY_COLOR] = color
+		# Create the Mesh.
+		arr_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+		var m = MeshInstance.new()
 		
-		#print(array)
+		m.mesh = arr_mesh
+		var mm = load("res://Scenes/Models/Misc/Grass_point.tscn")
+		m.translate(va[indices[starting_point]]+Vector3(0,-0.5,0))
 		
-		arrayMesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, array)
-		plantingbed.mesh = arrayMesh
-		plantingbed.translate(va[starting_point]+Vector3(0,3,0))
-		PlantAreas.add_child(plantingbed)
+		var multi_mesh = mm.instance()
+		m.add_child(multi_mesh)
+		multi_mesh.translate(Vector3(0,0,0))
+		multi_mesh.grow(m)
+		PlantAreas.add_child(m)
+		
+		
+		
+		
+		
+	#	var rows = int(rand_range(20,60))
+	#	var plantingbed = MeshInstance.new()
+	#	var arrayMesh = ArrayMesh.new()
+	#	var arrayM= []
+	#	var arrayI= []
+	#	var thisrow = 0
+	#	var lastrow = 0
+	#	var point = 0
+	#	for r in range(rows):
+			
+	#		var columns = int(rand_range(10,40))
+	#		if starting_point+(r*1000) < va.size():
+	#			arrayM.append(va[starting_point+(r*1000)])
+	#			arrayI.append(indices[starting_point-1])
+	#			arrayI.append(indices[starting_point])
+	#			arrayI.append(indices[starting_point+1])
+	#			var from = starting_point+(r*1000)
+	#			for c in range(columns):
+	#				if from - c > 0:
+	#					arrayM.append(va[from - c])
+	#					arrayI.append(indices[(from-c)-1])
+	#					arrayI.append(indices[from-c])
+	#					arrayI.append(indices[(from-c)+1])
+	#					
+	#	arrayMesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,[arrayM,uv,tangent,color,tex_uv,tex_uv2,bones,weight,arrayI])
+	#	plantingbed.mesh = arrayMesh
+	#	plantingbed.translate(va[starting_point]+Vector3(0,3,0))
+	#	PlantAreas.add_child(plantingbed)
 	

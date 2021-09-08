@@ -33,7 +33,7 @@ func rocks(area):
 		var placement = heightmap[int(random_location)] - Vector3(0,1,0)
 		#therock.translate(placement)
 		therock.global_translate(placement)
-		therock.to_local(placement)
+		#therock.to_local(placement)
 		$Ground.add_child(therock)
 		therock.drop_children()
 	return 1
@@ -43,12 +43,12 @@ func trees():
 
 
 
-func _on_underwater_area_shape_entered(area_id, area, area_shape, local_shape):
+func _on_underwater_area_shape_entered(_area_id, _area, _area_shape, _local_shape):
 	#print("underwater",area_shape)
 	pass # Replace with function body.
 
 
-func _on_underwater_body_shape_entered(body_id, body, body_shape, local_shape):
+func _on_underwater_body_shape_entered(_body_id, body, _body_shape, _local_shape):
 	if body.name == "PlayerTemplate":
 		print("underwater ",body.name)
 		#pass
@@ -58,7 +58,7 @@ func _on_underwater_body_shape_entered(body_id, body, body_shape, local_shape):
 	pass # Replace with function body.
 
 
-func _on_underwater_body_shape_exited(body_id, body, body_shape, local_shape):
+func _on_underwater_body_shape_exited(_body_id, body, _body_shape, _local_shape):
 	if body.name == "PlayerTemplate":
 		print("above water ",body.name)
 	pass # Replace with function body.

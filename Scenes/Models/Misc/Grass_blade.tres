@@ -1,0 +1,16 @@
+[gd_resource type="PlaneMesh" load_steps=3 format=2]
+
+[sub_resource type="Shader" id=1]
+code = "shader_type spatial;
+render_mode unshaded, cull_disabled;
+
+void fragment() {
+	ALBEDO = vec3(0,0.2,0);
+}"
+
+[sub_resource type="ShaderMaterial" id=2]
+shader = SubResource( 1 )
+
+[resource]
+material = SubResource( 2 )
+size = Vector2( 0.1, 2 )
